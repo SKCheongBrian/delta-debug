@@ -6,7 +6,7 @@ def test(input_str):
 
 def dd2(c_pass, c_fail, n):
     """
-    Revised dd2 implements the Delta Debugging algorithm.
+    dd2 
     Assumes:
        c_fail.startswith(c_pass)
        test(c_pass)==False and test(c_fail)==True.
@@ -88,7 +88,7 @@ def delta_debug(c_pass, c_fail, n=2):
 
 if __name__ == "__main__":
     # Use the provided passing input.
-    passing_input = "this"
+    passing_input = "thisisinputthatshouldpass"
     failing_input = "thisistestinputerrorthatshouldfail"
 
     print("Minimal Failure-Inducing Difference:")
