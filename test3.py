@@ -1,4 +1,85 @@
 from difflib import ndiff
+import json
+
+def dddiff(c1, c2, n):
+    ''' general delta debugging algorithm '''
+    run = 1
+    cbar_offset = 0
+
+    c1_orig = c1
+    c2_orig = c2
+
+    # replace tail recursion with iteration
+    while 1:
+        print ("dd: c1 =", c1)
+        print ("dd: c2 =", c2)
+
+        t1 = test(c1) # PASS
+        t2 = test(c2) # FAIL
+
+        assert t1 == True, "c1 should be valid"
+        assert t2 == False, "c2 should be invalid"
+
+        c = compute_edits(c1, c2)
+
+        print("dd: c =", c)
+
+        if n > len(c):
+            print("dd: done")
+            return (c1, c2, c)
+        
+        cs = split(c, n)
+        print("dd: cs =", cs)
+
+        print("dd run #", run, ": trying")
+        for i in range(n):
+            if i > 0:
+                print("+")
+            print(len(cs[i]))
+        
+        progress = 0
+        next_c1 = c1
+        next_c2 = c2
+        next_n = n
+        
+        # Check subsets
+        for j in range(n):
+            i = (j + cbar_offset) % n
+            print("dd: trying", cs[i])
+            
+            
+
+
+def split(c, n):
+    """Split c into n chunks"""
+    # k, m = divmod(len(c), n)
+    # return (c[i * k + min(i, m): (i + 1) * k + min(i+1, m)] for i in range(n))
+    chunks = []
+    start = 0
+    chunk_size = len(c) // n
+    remainder = len(c) % n
+    for i in range(n):
+        end = start + chunk_size + (1 if i >= n - remainder else 0)
+        if start < len(c): 
+            chunks.append(c[start:end])
+        start = end
+    return chunks
+
+
+def test(c):
+    candidate = "".join(c)
+    print("Testing candidate:", candidate)
+
+    # Treat empty candidate as valid
+    if candidate.strip() == "":
+        print("Candidate is empty, skipping.")
+        return True
+    try:
+        json.loads(candidate)
+        return True
+    except json.JSONDecodeError:
+        return False
+
 
 def compute_edits(c1, c2):
     """Compute fine-grained edit operations to transform c1 into c2"""
@@ -42,3 +123,11 @@ print("\nApplying edits:")
 result = apply_edits(c1, edits)
 print("\nFinal result after applying all edits:")
 print(result)
+
+print("\nTesting candidates:")
+c1_result = test(c1)
+print("Test result for c1:", c1_result)
+c2_result = test(c2)
+print("Test result for c2:", c2_result)
+
+dddiff(c1, c2, 2)
