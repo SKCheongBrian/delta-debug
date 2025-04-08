@@ -6,8 +6,8 @@ def dddiff(c1, c2, n):
     run = 1
     cbar_offset = 0
 
-    c1_orig = c1
-    c2_orig = c2
+    # c1_orig = c1
+    # c2_orig = c2
 
     # replace tail recursion with iteration
     while 1:
@@ -17,18 +17,18 @@ def dddiff(c1, c2, n):
         t1 = test(c1) # PASS
         t2 = test(c2) # FAIL
 
-        assert t1 == True, "c1 should be valid"
-        assert t2 == False, "c2 should be invalid"
+        assert t1 == 1, "c1 should be valid"
+        assert t2 == 0, "c2 should be invalid"
 
-        c = compute_edits(c1, c2)
+        edits = compute_edits(c1, c2)
 
-        print("dd: c =", c)
+        print("dd: edits =", edits)
 
-        if n > len(c):
+        if n > len(edits):
             print("dd: done")
-            return (c1, c2, c)
+            return (c1, c2, edits)
         
-        cs = split(c, n)
+        cs = split(edits, n)
         print("dd: cs =", cs)
 
         print("dd run #", run, ": trying")
@@ -38,8 +38,8 @@ def dddiff(c1, c2, n):
             print(len(cs[i]))
         
         progress = 0
-        next_c1 = c1
-        next_c2 = c2
+        next_c1 = c1[:]
+        next_c2 = c2[:]
         next_n = n
         
         # Check subsets
@@ -66,19 +66,41 @@ def split(c, n):
     return chunks
 
 
+
+
+# def test(c):
+    # candidate = "".join(c)
+    # print("Testing candidate:", candidate)
+
+    # # Treat empty candidate as valid
+    # if candidate.strip() == "":
+    #     print("Candidate is empty, skipping.")
+    #     return True
+    # try:
+    #     json.loads(candidate)
+    #     return True
+    # except json.JSONDecodeError:
+    #     return False
+    # Reassemble configuration into candidate string.
+
+# Returns 1 if pass, 0 fail, 2 otherwise
 def test(c):
     candidate = "".join(c)
     print("Testing candidate:", candidate)
-
-    # Treat empty candidate as valid
+    # Treat an empty candidate as passing.
     if candidate.strip() == "":
-        print("Candidate is empty, skipping.")
-        return True
+        return 1
     try:
         json.loads(candidate)
-        return True
-    except json.JSONDecodeError:
-        return False
+        return 1
+    except json.JSONDecodeError as e:
+        error_message = str(e)
+        error_pos = e.pos
+        print("Error at position", error_pos, ":", error_message)
+        if "Expecting ',' delimiter" in error_message or "Expecting property name enclosed in double quotes" in error_message:
+            print("------------------------------")
+            return 0
+        return 2
 
 
 def compute_edits(c1, c2):
