@@ -22,7 +22,7 @@ class Missing_curly_brace(DD):
             return "".join(c)
         
 failing_json = '{"baz": 7, "zip": 1.0, "zop": [1, 2]'
-passing_json = '{ "foo": "bar" }'
+passing_json = '{ "foo": 3.0 }'
 
 failing_config = list(failing_json)
 passing_config = list(passing_json)
