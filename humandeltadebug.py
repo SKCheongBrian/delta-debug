@@ -135,7 +135,7 @@ def oc_test():
 class DD:
     # Main DD implementation
     # dd() computes min failure-inducing diff
-    # ddmax() computes the max failure inducing case
+    # ddmax() computes the max failure inducing case with respect to a passing test case
 
     # Test outcomes, as defined in dd2 paper
     PASS = "PASS"

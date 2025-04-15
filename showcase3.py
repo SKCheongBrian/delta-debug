@@ -38,9 +38,14 @@ logic_bug_dd.verbose = 1 if args.verbose else 0
 # Minimizing the bug
 minimal_config = logic_bug_dd.dd(failing_config)
 minimal_failing = DD.config_to_string(minimal_config[0])
+print("**********")
+print("* Test 1 *")
+print("**********************************************")
+print("Failing test case to be minimised: \n " + failing_py)
 print("**********************************************")
 print("Minimal failing test case: \n" + minimal_failing)
 print("**********************************************")
+print("Passing test case to be maximised with respect to: \n" + passing_py)
 
 # Maximizing it w.r.t the passing config
 max_config = logic_bug_dd.ddmax(DD.string_to_config(minimal_failing), passing_config, 2)

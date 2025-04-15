@@ -28,9 +28,14 @@ test_string_dd.verbose = 1 if args.verbose else 0
 
 minimal_config = test_string_dd.dd(failing_config)
 minimal_failing = DD.config_to_string(minimal_config[0])
+print("**********")
+print("* Test 1 *")
+print("**********************************************")
+print("Failing test case to be minimised: " + failing_string)
 print("**********************************************")
 print("Minimal failing test case: " + minimal_failing)
 print("**********************************************")
+print("Passing test case to be maximised with respect to: " + passing_string)
 
 max_config = test_string_dd.ddmax(DD.string_to_config(minimal_failing), passing_config, 2)
 maximal_failing = DD.config_to_string(max_config[1])

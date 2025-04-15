@@ -22,6 +22,10 @@ class Missing_curly_brace(DD):
         
 failing_json = '{"baz": 7, "zip": 1.0, "zop": [1, 2]'
 passing_json = '{ "foo": 3.0 }'
+print("**********")
+print("* Test 1 *")
+print("**********************************************")
+print("Failing test case to be minimised: " + failing_json)
 
 failing_config = DD.string_to_config(failing_json)
 passing_config = DD.string_to_config(passing_json)
@@ -38,6 +42,7 @@ minimal_failing = DD.config_to_string(minimal_config[0])
 print("**********************************************")
 print("Minimal failing test case: " + minimal_failing)
 print("**********************************************")
+print("Passing test case to be maximised with respect to: " + passing_json)
 
 max_config = missing_curly_brace_dd.ddmax(DD.string_to_config(minimal_failing), passing_config, 2)
 maximal_failing = DD.config_to_string(max_config[1])
@@ -47,6 +52,11 @@ print("**********************************************")
 
 failing_json2 = '{"foo": 3.0, "bar": 1.0 '
 passing_json2 = '{ "boo": "bar" }'
+print("")
+print("**********")
+print("* Test 2 *")
+print("**********************************************")
+print("Failing test case to be minimised: " + failing_json2)
 
 failing_config2 = DD.string_to_config(failing_json2)
 passing_config2 = DD.string_to_config(passing_json2)
@@ -56,6 +66,7 @@ minimal_failing = DD.config_to_string(minimal_config[0])
 print("**********************************************")
 print("Minimal failing test case: " + minimal_failing)
 print("**********************************************")
+print("Passing test case to be maximised with respect to: " + passing_json2)
 
 max_config = missing_curly_brace_dd.ddmax(DD.string_to_config(minimal_failing), passing_config2, 2)
 maximal_failing = DD.config_to_string(max_config[1])
