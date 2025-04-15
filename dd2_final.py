@@ -23,7 +23,7 @@ class OutcomeCache:
     def add(self, c, result):
         # add (c, result) to cache
         cs = c[:]
-        # cs.sort()
+        cs.sort()
 
         p = self
 
@@ -245,7 +245,7 @@ class DD:
     # testing
     def test(self, c):
         """Test the configuration C.  Return PASS, FAIL, or UNRESOLVED"""
-        # c = sorted(c)
+        c.sort()
 
         # If we had this test before, return its result
         if self.cache_outcomes:
@@ -577,8 +577,8 @@ class DD:
                 t1 = self.PASS
                 t2 = self.FAIL
             else:
-                t1 = self._test(c1)
-                t2 = self._test(c2)
+                t1 = self.test(c1)
+                t2 = self.test(c2)
             
             assert t1 == self.PASS
             assert t2 == self.FAIL
@@ -814,6 +814,26 @@ class DD:
     #         c1  = next_c1
     #         n   = next_n
     #         run = run + 1
+    def match_subset(self, c1, c2):
+        """Mutate c1 a subset of c2 if possible
+
+        Args:
+            c1 (config): config of c1
+            c2 (config): config of c2
+        """
+        p1 = 0
+        p2 = 0
+
+        while p1 < len(c1):
+            current_character = c1[p1][1]
+            while p2 < len(c2) and c2[p2][1] is not current_character:
+                p2 += 1
+            if p2 == len(c2):
+                return
+            c1[p1] = (c2[p2][0], current_character)
+            p2 += 1
+            p1 += 1
+
     def _ddmax(self, c1, c2, n):  # Modified to handle adding to the front or back of c1
         """
         Expand c1 (failing), with respect to c2, to find the maximum failing configuration 
@@ -832,11 +852,12 @@ class DD:
                 print("dd: c2 =", self.pretty(c2))
     
             # Test c1 and c2
-            t1 = self._test(c1)
-            t2 = self._test(c2)
+            t1 = self.test(c1)
+            t2 = self.test(c2)
     
             assert t1 == self.FAIL, "c1 must be failing"
             assert t2 == self.PASS, "c2 must be passing"
+            self.match_subset(c1,c2)
             assert self.__listsubseteq(c1, c2), "c1 must be a subset of c2"
     
             # Compute the difference between c2 and c1
@@ -878,34 +899,20 @@ class DD:
                     print("dd: trying", self.pretty(cs[i]))
     
                 # Try adding the subset to the back of c1
-                csub_back = self.__listunion(c1, cs[i])
-                t_back = self._test(csub_back)
+                csub = self.__listunion(c1, cs[i])
+                t = self.test(csub)
+
+                print("csub: ", csub)
     
-                # Try adding the subset to the front of c1
-                csub_front = cs[i] + c1
-                t_front = self._test(csub_front)
-    
-                if t_back == self.FAIL:
+                if t == self.FAIL:
                     # If adding to the back keeps c1 failing, keep the subset
                     progress = 1
-                    next_c1 = csub_back
+                    next_c1 = csub
                     next_n = max(next_n - 1, 2)
                     cbar_offset = i
     
                     if self.debug_dd:
                         print("dd: expand c1 (back) to", len(next_c1), "deltas:",)
-                        print(self.pretty(next_c1))
-                    break
-    
-                if t_front == self.FAIL:
-                    # If adding to the front keeps c1 failing, keep the subset
-                    progress = 1
-                    next_c1 = csub_front
-                    next_n = max(next_n - 1, 2)
-                    cbar_offset = i
-    
-                    if self.debug_dd:
-                        print("dd: expand c1 (front) to", len(next_c1), "deltas:",)
                         print(self.pretty(next_c1))
                     break
     
@@ -1180,6 +1187,27 @@ class DD:
 
 import json
 
+def string_to_config(s):
+    """
+    Converts the given string into a config so that we can do all the 
+    sorting business :-)
+    """
+    res = []
+    idx = 0
+    for c in s:
+        res.append((idx, c))
+        idx += 1
+    return res
+
+def config_to_string(c):
+    """
+    Converts the given config back into a string
+    """
+    res = []
+    for x, y in c:
+        res.append(y)
+    return "".join(res)
+
 if __name__ == '__main__':
     # First, test the outcome cache
     oc_test()
@@ -1187,7 +1215,7 @@ if __name__ == '__main__':
     # Define our own DD subclass for our JSON parsing use case.
     class Missing_curly_brace(DD):
         def _test(self, c):
-            candidate = "".join(c)
+            candidate = config_to_string(c)
             print("Testing candidate:", candidate)
             # Treat an empty candidate as passing.
             if candidate.strip() == "":
@@ -1207,7 +1235,7 @@ if __name__ == '__main__':
         def coerce(self, c):
             # Reassemble for output.
             print(type(c))
-            return "".join(c)
+            return config_to_string(c)
         
     class Missing_value(DD):
         def _test(self, c):
@@ -1235,7 +1263,7 @@ if __name__ == '__main__':
         
     class Fake(DD):
         def _test(self, c):
-            candidate = "".join(c)
+            candidate = config_to_string(c)
             if "$" in candidate and "test" in candidate:
                 return self.PASS
             else:
@@ -1244,13 +1272,13 @@ if __name__ == '__main__':
         def coerce(self, c):
             # Reassemble for output.
             print(type(c))
-            return "".join(c)
+            return config_to_string(c)
     
     print("Computing minimal failing JSON input...")
     # This input is invalid JSON: It is missing a closing bracket.
     failing_json = '{"baz": 7, "zip": 1.0, "zop": [1, 2]'
     # Convert the input JSON string into a list of characters (our configuration)
-    failing_config = list(failing_json)
+    failing_config = string_to_config(failing_json)
     
     missing_curly_brace_dd = Missing_curly_brace()
     missing_value_dd = Missing_value()
@@ -1263,37 +1291,31 @@ if __name__ == '__main__':
     minimal_config = missing_curly_brace_dd.dd(failing_config)
     print("minimal_config")
     for thing in minimal_config:
-        print("".join(thing))
+        print(config_to_string(thing))
     print("==============")
 
     print("debug:" + str(minimal_config))
     # result = mydd.coerce(minimal_config)
-    minimal_failing = "".join(minimal_config[0])
+    minimal_failing = config_to_string(minimal_config[0])
     
     print("The minimal failure-inducing JSON is:")
     print(minimal_failing)
 
-    max_config = missing_curly_brace_dd._ddmax(list(minimal_failing), list('{ "foo": 1 }'), 2)
+    max_config = missing_curly_brace_dd._ddmax(string_to_config(minimal_failing), string_to_config('{ "foo": "bar" }'), 2)
     for thing in max_config:
-        print("".join(thing))
+        print(config_to_string(thing))
 
-    print(missing_curly_brace_dd._test(list('{"t": , "bar": 3 }')))
+    print(missing_curly_brace_dd._test(string_to_config('{"t": , "bar": 3 }')))
     
     big_fail = 'asdfasdf$laksjdflasjdflkasjdflkasjdflkasjdflkj'
     initial_pass = 'sdf$abcdefgtesthijklmnop'
 
     fake_dd = Fake()
 
-    minimal_config = fake_dd.dd(list(big_fail))
+    minimal_config = fake_dd.dd(string_to_config(big_fail))
     print(minimal_config)
 
-    max_config = fake_dd._ddmax(list(minimal_config[0]), list(initial_pass), 2)
+    max_config = fake_dd._ddmax(minimal_config[0], string_to_config(initial_pass), 2)
     for thing in max_config:
-        print("".join(thing))
+        print(config_to_string(thing))
 
-    
-    # Optionally, you can verify 1-minimality by testing removal of each character.
-    # for i in range(len(minimal_config)):
-    #     test_config = minimal_config[:i] + minimal_config[i+1:]
-    #     outcome = mydd.test(test_config)
-    #     print("Without char at index {}: '{}' => {}".format(i, "".join(test_config), outcome))
