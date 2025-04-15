@@ -1,4 +1,8 @@
-# From Prof Andreas Zeller's original implementation in DD.py
+# Modified from Prof. Andreas Zeller's original implementation in DD.py
+# Stripped down unused portions and extended with ddmax
+#
+# ddmax is attempting to create a maximal failing test case with respect to a passing one
+#
 # https://github.com/grimm-co/delta-debugging/blob/master/delta_debugging/DD.py
 
 import string
