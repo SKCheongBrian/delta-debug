@@ -1,9 +1,9 @@
-from dd2v6 import DD, OutcomeCache
+from humandeltadebug import DD, string_to_config, config_to_string
 import json
 
 class Missing_curly_brace(DD):
         def _test(self, c):
-            candidate = "".join(c)
+            candidate = config_to_string(c)
             print("Testing candidate:", candidate)
             # Treat an empty candidate as passing.
             if candidate.strip() == "":
@@ -19,24 +19,42 @@ class Missing_curly_brace(DD):
         def coerce(self, c):
             # Reassemble for output.
             print(type(c))
-            return "".join(c)
+            return config_to_string(c)
         
 failing_json = '{"baz": 7, "zip": 1.0, "zop": [1, 2]'
 passing_json = '{ "foo": 3.0 }'
 
-failing_config = list(failing_json)
-passing_config = list(passing_json)
+failing_config = string_to_config(failing_json)
+passing_config = string_to_config(passing_json)
 
 missing_curly_brace_dd = Missing_curly_brace()
 
 minimal_config = missing_curly_brace_dd.dd(failing_config)
-minimal_failing = "".join(minimal_config[0])
+minimal_failing = config_to_string(minimal_config[0])
 print("**********************************************")
 print("Minimal failing test case: " + minimal_failing)
 print("**********************************************")
 
-max_config = missing_curly_brace_dd._ddmax(list(minimal_failing), passing_config, 2)
-maximal_failing = "".join(max_config[1])
+max_config = missing_curly_brace_dd._ddmax(string_to_config(minimal_failing), passing_config, 2)
+maximal_failing = config_to_string(max_config[1])
+print("**********************************************")
+print("Maximal failing test case: " + maximal_failing)
+print("**********************************************")
+
+failing_json2 = '{"foo": 3.0, "bar": 1.0 '
+passing_json2 = '{ "boo": "bar" }'
+
+failing_config2 = string_to_config(failing_json2)
+passing_config2 = string_to_config(passing_json2)
+
+minimal_config = missing_curly_brace_dd.dd(failing_config2)
+minimal_failing = config_to_string(minimal_config[0])
+print("**********************************************")
+print("Minimal failing test case: " + minimal_failing)
+print("**********************************************")
+
+max_config = missing_curly_brace_dd._ddmax(string_to_config(minimal_failing), passing_config2, 2)
+maximal_failing = config_to_string(max_config[1])
 print("**********************************************")
 print("Maximal failing test case: " + maximal_failing)
 print("**********************************************")

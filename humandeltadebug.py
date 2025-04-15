@@ -46,7 +46,7 @@ class OutcomeCache:
 
     def lookup_superset(self, c, start=0):
         # return result if there is some (c', result) in the cache with
-# c' being the superset of c or equal to c. else None.
+        # c' being the superset of c or equal to c. else None.
 
         if start >= len(c):
             if self.result:
@@ -130,9 +130,8 @@ def oc_test():
             
 class DD:
     # Main DD implementation
-    # To use, overload test() method and call ddmin() method
-    # ddmin() computes min failure-inducing config
     # dd() computes min failure-inducing diff
+    # ddmax() computes the max failure inducing case
 
     # Test outcomes, as defined in dd2 paper
     PASS = "PASS"
@@ -201,6 +200,10 @@ class DD:
 
     def __listunion(self, c1, c2):
         """Return the union of C1 and C2."""
+        print("union")
+        print(c1)
+        print(c2)
+        
         s1 = {}
         for delta in c1:
             s1[delta] = 1
@@ -210,6 +213,8 @@ class DD:
             if delta not in s1:
                 c.append(delta)
 
+        print(c)
+        print("=====")
         return c
 
     def __listsubseteq(self, c1, c2):
@@ -240,22 +245,6 @@ class DD:
     def test(self, c):
         """Test the configuration C.  Return PASS, FAIL, or UNRESOLVED"""
         c.sort()
-
-        # If we had this test before, return its result
-        if self.cache_outcomes:
-            cached_result = self.outcome_cache.lookup(c)
-            if cached_result is not None:
-                return cached_result
-
-        if self.monotony:
-            # Check whether we had a passing superset of this test before
-            cached_result = self.outcome_cache.lookup_superset(c)
-            if cached_result == self.PASS:
-                return self.PASS
-            
-            cached_result = self.outcome_cache.lookup_subset(c)
-            if cached_result == self.FAIL:
-                return self.FAIL
 
         if self.debug_test:
             print()
@@ -348,8 +337,9 @@ class DD:
         """Repeat testing CSUB + R while unresolved."""
 
         initial_csub = csub[:]
+        print("in test and resolve")
         c2 = self.__listunion(r, c)
-
+        print(csub, r)
         csubr = self.__listunion(csub, r)
         t = self.test(csubr)
 
@@ -427,118 +417,7 @@ class DD:
 
         return (t, csub)
     
-    # dd
-    def ddgen(self, c, minimize, maximize):
-        """Return a 1-minimal failing subset of C"""
-
-        self.minimize = minimize
-        self.maximize = maximize
-
-        n = 2
-        self.CC = c
-
-        if self.debug_dd:
-            print("dd(%s, %d)..." % (self.pretty(c), n))
-
-        outcome = self._dd(c, n)
-
-        if self.debug_dd:
-            print("dd(%s, %d) = %s" % (self.pretty(c), n, outcome))
-
-        return outcome
-    
-    def _dd(self, c, n):
-        """Stub to overload in subclasses"""
-
-        assert self.test([]) == self.PASS
-
-        run = 1
-        cbar_offset = 0
-
-        # We replace the tail recursion from the paper by a loop
-        while 1:
-            tc = self.test(c)
-            assert tc == self.FAIL or tc == self.UNRESOLVED
-
-            if n > len(c):
-                # No further minimizing
-                if self.verbose:
-                    print("dd: done")
-                return c
-
-            self.report_progress(c, "dd")
-
-            cs = self.split(c, n)
-
-            if self.verbose:
-                print()
-                print("dd (run #%d): trying" % run)
-                for i in range(n):
-                    if i > 0:
-                        print("+",)
-                    print(len(cs[i]),)
-                print()
-
-            c_failed    = 0
-            cbar_failed = 0
-
-            next_c = c[:]
-            next_n = n
-
-            if not c_failed:
-                # Check complements
-                cbars = n * [self.UNRESOLVED]
-
-                # print("cbar_offset =", cbar_offset)
-
-                for j in range(n):
-                    i = int((j + cbar_offset) % n)
-                    cbars[i] = self.__listminus(c, cs[i])
-                    t, cbars[i] = self.test_mix(cbars[i], c, self.ADD)
-                    doubled = self.__listintersect(cbars[i], cs[i])
-                    if doubled != []:
-                        cs[i] = self.__listminus(cs[i], doubled)
-
-                    if t == self.FAIL:
-                        if self.debug_dd:
-                            print("dd: reduced to", len(cbars[i]),)
-                            print("deltas:",)
-                            print(self.pretty(cbars[i]))
-
-                        cbar_failed = 1
-                        next_c = self.__listintersect(next_c, cbars[i])
-                        next_n = next_n - 1
-                        self.report_progress(next_c, "dd")
-
-                        # In next run, start removing the following subset
-                        cbar_offset = i
-                        break
-
-            if not c_failed and not cbar_failed:
-                if n >= len(c):
-                    # No further minimizing
-                    print("dd: done")
-                    return c
-
-                next_n = min(len(c), n * 2)
-                if self.verbose:
-                    print("dd: increase granularity to", next_n)
-                cbar_offset = (cbar_offset * next_n) / n
-
-            c = next_c
-            n = next_n
-            run = run + 1
-
-    def ddmin(self, c):
-        return self.ddgen(c, 1, 0)
-
-    def ddmax(self, c):
-        return self.ddgen(c, 0, 1)
-
-    def ddmix(self, c):
-        return self.ddgen(c, 1, 1)
-
-    # general delta debugging (new TSE version)
+    # general differential delta debugging (new TSE version)
     def dddiff(self, c):
         n = 2
 
@@ -553,7 +432,7 @@ class DD:
 
         return outcome
 
-    def _dddiff(self, c1, c2, n): # @brian
+    def _dddiff(self, c1, c2, n): 
         run = 1
         cbar_offset = 0
 
@@ -594,7 +473,7 @@ class DD:
 
             if self.verbose:
                 print()
-                print("dd (run #" + run + "): trying",)
+                print("dd (run #" + str(run) + "): trying",)
                 for i in range(n):
                     if i > 0:
                         print("+",)
@@ -609,14 +488,18 @@ class DD:
 
             # Check subsets
             for j in range(n):
-                i = (j + cbar_offset) % n
+                i = int((j + cbar_offset) % n)
 
                 if self.debug_dd:
                     print("dd: trying", self.pretty(cs[i]))
 
                 (t, csub) = self.test_and_resolve(cs[i], c1, c, self.REMOVE)
+                # adding subset to c1
                 csub = self.__listunion(c1, csub)
 
+                # case 1: if union c1 with subset fails (c1 was initially passing)
+                # c2 (failing test case) is now csub (union c1 subset)
+                # minimal test would be within c1 and c2 again.
                 if t == self.FAIL and t1 == self.PASS:
                     # Found
                     progress    = 1
@@ -698,140 +581,171 @@ class DD:
             n   = next_n
             run = run + 1
 
+    def match_subset(self, c1, c2):
+        """Mutate c1 a subset of c2 if possible
+
+        Args:
+            c1 (config): config of c1
+            c2 (config): config of c2
+        """
+        p1 = 0
+        p2 = 0
+
+        while p1 < len(c1):
+            current_character = c1[p1][1]
+            while p2 < len(c2) and c2[p2][1] is not current_character:
+                p2 += 1
+            if p2 == len(c2):
+                return
+            c1[p1] = (c2[p2][0], current_character)
+            p2 += 1
+            p1 += 1
+
+    def _ddmax(self, c1, c2, n):  
+        """Expand c1 to the maximal failing test case with respect to c2
+
+        Args:
+            c1 (config): The config to be expanded to
+            c2 (config): The config to be expanded with respect to
+            n (integer): The granularity size
+
+        Returns:
+            _type_: _description_
+        """
+        run = 1
+        cbar_offset = 0
+    
+        c1_orig = c1[:]
+        c2_orig = c2[:]
+    
+        # Replace tail recursion with a loop
+        while True:
+            if self.debug_dd:
+                print("dd: c1 =", self.pretty(c1))
+                print("dd: c2 =", self.pretty(c2))
+    
+            # Test c1 and c2
+            t1 = self.test(c1)
+            t2 = self.test(c2)
+    
+            assert t1 == self.FAIL, "c1 must be failing"
+            assert t2 == self.PASS, "c2 must be passing"
+            self.match_subset(c1,c2)
+            assert self.__listsubseteq(c1, c2), "c1 must be a subset of c2"
+    
+            # Compute the difference between c2 and c1
+            c = self.__listminus(c2, c1)
+    
+            if self.debug_dd:
+                print("dd: c2 - c1 =", self.pretty(c))
+    
+            if n > len(c):
+                # No further expanding
+                if self.verbose:
+                    print("dd: done")
+                return (c, c1, c2)
+    
+            self.report_progress(c, "dd")
+    
+            # Split the difference into subsets
+            cs = self.split(c, n)
+    
+            if self.verbose:
+                print()
+                print("dd (run #" + str(run) + "): trying",)
+                for i in range(n):
+                    if i > 0:
+                        print("+",)
+                    print(len(cs[i]),)
+                print()
+    
+            progress = 0
+    
+            next_c1 = c1[:]
+            next_n = n
+    
+            # Check subsets
+            for j in range(n):
+                i = int((j + cbar_offset) % n)
+    
+                if self.debug_dd:
+                    print("dd: trying", self.pretty(cs[i]))
+    
+                # Try adding the subset to the back of c1
+                csub = self.__listunion(c1, cs[i])
+                t = self.test(csub)
+
+                print("csub: ", csub)
+    
+                if t == self.FAIL:
+                    # If adding to the back keeps c1 failing, keep the subset
+                    progress = 1
+                    next_c1 = csub
+                    next_n = max(next_n - 1, 2)
+                    cbar_offset = i
+    
+                    if self.debug_dd:
+                        print("dd: expand c1 (back) to", len(next_c1), "deltas:",)
+                        print(self.pretty(next_c1))
+                    break
+    
+            if progress:
+                if self.animate is not None:
+                    self.animate.write_outcome(
+                        self.__listminus(next_c1, c1_orig), self.FAIL)
+                    self.animate.write_outcome(
+                        self.__listminus(c2_orig, c2), self.PASS)
+                    self.animate.write_outcome(
+                        self.__listminus(c2, next_c1), self.DIFFERENCE)
+                    self.animate.next_frame()
+    
+                self.report_progress(self.__listminus(c2, next_c1), "dd")
+            else:
+                if n >= len(c):
+                    # No further expanding
+                    if self.verbose:
+                        print("dd: done")
+                    return (c, c1, c2)
+    
+                next_n = min(len(c), n * 2)
+                if self.verbose:
+                    print("dd: increase granularity to", next_n)
+                cbar_offset = (cbar_offset * next_n) / n
+    
+            c1 = next_c1
+            n = next_n
+            run += 1
+            
     def dd(self, c):
         return self.dddiff(c)           # Backwards compatibility
     
-    # all relevant deltas by applying ddmin
+def string_to_config(s):
+    """Converts the string into a config
 
-    # helper function: compute all different atoms of the term
-    def condense_formula(self,formula):
-        elems  = []
-        result = []
-        for and_term in formula:
-            elems.extend(and_term)
-        for e in elems:
-            if not e in result:
-                result.append(e)
-        result.sort()
-        return result
+    Args:
+        s (string): The string to be converted into a config
 
-    # helper function: print a term in human readable form
-    def pretty_formula(self,formula):
-        ostr = ""
-        for and_term in formula:
-            print(ostr + "(",)
-            astr = ""
-            for el in and_term:
-                print(astr + el,)
-                astr = " and "
-            print(")",)
-            ostr = " or "
+    Returns:
+        config: The resultant config
+    """
+    res = []
+    idx = 0
+    for c in s:
+        res.append((idx, c))
+        idx += 1
+    return res
 
-    #Helper function: compute all sets, where min_set is not subset
-    def non_supersets(self, superset, min_set):
-        result = []
-        for e in min_set:
-            result.append(self.__listminus(superset,[e]))
-        return result
+def config_to_string(c):
+    """Converts the config c to a string (usually for testing)
 
-    #ard() computes a logical formula
-    def ard(self, c):
-        formula = []
+    Args:
+        c (config): The config to be converted to string
 
-        testsets = [c[:]]
+    Returns:
+        string: The resultant string
+    """
+    res = []
+    for x, y in c:
+        res.append(y)
+    return "".join(res)
 
-        while testsets != []:
-            if self.debug_dd:
-                print("ard: Testsets")
-                print(testsets)
-
-            #First run
-            testset = testsets.pop()
-            min_set = self.ddmin(testset)
-
-
-            #remove subsumed testsets
-            new_testsets = []
-            old_testsets = []
-            for test in testsets:
-                if self.__listsubseteq(min_set,test):
-                    new_testsets.extend(self.non_supersets(test,min_set))
-                else:
-                    old_testsets.append(test)
-
-            testsets = old_testsets
-
-            #Create new testsets
-            new_testsets.extend(self.non_supersets(testset,min_set))
-
-            #Retest new testsets
-            for test in new_testsets:
-                outcome = self.test(test)
-                if outcome == self.FAIL:
-                    testsets.append(test)
-                elif outcome == self.UNRESOLVED:
-                    if self.debug_dd:
-                        print("ard: UNRESOLVED don't know what to do yet")
-                else:
-                    pass 
-
-            #Extend formula
-            formula.append(min_set)
-
-        if self.debug_dd:
-            self.pretty_formula(formula)
-
-            print("Needed "+ self.n_tests +":P:"+ self.n_passes+"/F:"+ self.n_fails +"/U:"+ self.n_unres )
-
-        #Return a set of all relevant deltas, and a formula
-        return (self.condense_formula(formula),[],c,formula)
-
-import json
-
-if __name__ == '__main__':
-    # First, test the outcome cache
-    oc_test()
-    
-    # Define our own DD subclass for our JSON parsing use case.
-    class MyDD(DD):
-        def _test(self, c):
-            # Reassemble configuration into candidate string.
-            candidate = "".join(c)
-            print("Testing candidate:", candidate)
-            # Treat an empty candidate as passing.
-            if candidate.strip() == "":
-                return self.PASS
-            try:
-                json.loads(candidate)
-                return self.PASS
-            except json.JSONDecodeError:
-                return self.FAIL
-        
-        def coerce(self, c):
-            # Reassemble for output.
-            return "".join(c)
-    
-    print("Computing minimal failing JSON input...")
-    # This input is invalid JSON: It is missing a closing bracket.
-    input_json = '{"baz": 7, "zip": 1.0, "zop": [1, 2]'
-    # Convert the input JSON string into a list of characters (our configuration)
-    config = list(input_json)
-    
-    mydd = MyDD()
-    # Check preconditions: an empty configuration (which parses to an empty string) should PASS,
-    # while the full configuration (the broken JSON string) should FAIL.
-    assert mydd.test([]) == mydd.PASS
-    assert mydd.test(config) == mydd.FAIL
-    
-    # Invoke ddmin to compute the 1-minimal failing configuration.
-    minimal_config = mydd.ddmin(config)
-    result = mydd.coerce(minimal_config)
-    
-    print("The minimal failure-inducing JSON is:")
-    print(result)
-    
-    # Optionally, you can verify 1-minimality by testing removal of each character.
-    # for i in range(len(minimal_config)):
-    #     test_config = minimal_config[:i] + minimal_config[i+1:]
-    #     outcome = mydd.test(test_config)
-    #     print("Without char at index {}: '{}' => {}".format(i, "".join(test_config), outcome))
