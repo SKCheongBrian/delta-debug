@@ -150,7 +150,7 @@ class DD:
     debug_dd = 0
     debug_split = 0
     debug_resolve = 0
-    verbose = 1
+    verbose = 0
     state_debugger = 0
 
     def __init__(self):
@@ -185,24 +185,12 @@ class DD:
 
         return c
 
-    def __listintersect(self, c1, c2):
-        """Return the common elements of C1 and C2."""
-        s2 = {}
-        for delta in c2:
-            s2[delta] = 1
-
-        c = []
-        for delta in c1:
-            if delta in s2:
-                c.append(delta)
-
-        return c
-
     def __listunion(self, c1, c2):
         """Return the union of C1 and C2."""
-        print("union")
-        print(c1)
-        print(c2)
+        if self.verbose:
+            print("union")
+            print(c1)
+            print(c2)
         
         s1 = {}
         for delta in c1:
@@ -213,8 +201,9 @@ class DD:
             if delta not in s1:
                 c.append(delta)
 
-        print(c)
-        print("=====")
+        if self.verbose:
+            print(c)
+            print("=====")
         return c
 
     def __listsubseteq(self, c1, c2):
@@ -245,6 +234,10 @@ class DD:
     def test(self, c):
         """Test the configuration C.  Return PASS, FAIL, or UNRESOLVED"""
         c.sort()
+
+        if self.verbose:
+            print(c)
+            print("Testing candidate: " + DD.config_to_string(c))
 
         if self.debug_test:
             print()
@@ -337,9 +330,7 @@ class DD:
         """Repeat testing CSUB + R while unresolved."""
 
         initial_csub = csub[:]
-        print("in test and resolve")
         c2 = self.__listunion(r, c)
-        print(csub, r)
         csubr = self.__listunion(csub, r)
         t = self.test(csubr)
 
@@ -389,33 +380,6 @@ class DD:
             print(title + ": " + str(len(c)) + " deltas left:", self.coerce(c))
             self.__last_reported_length = len(c)
 
-    def test_mix(self, csub, c, direction):
-        if self.minimize:
-            (t, csub) = self.test_and_resolve(csub, [], c, direction)
-            if t == self.FAIL:
-                return (t, csub)
-
-        if self.maximize:
-            csubbar = self.__listminus(self.CC, csub)
-            cbar    = self.__listminus(self.CC, c)
-            if direction == self.ADD:
-                directionbar = self.REMOVE
-            else:
-                directionbar = self.ADD
-
-            (tbar, csubbar) = self.test_and_resolve(csubbar, [], cbar,
-                                                    directionbar)
-
-            csub = self.__listminus(self.CC, csubbar)
-
-            if tbar == self.PASS:
-                t = self.FAIL
-            elif tbar == self.FAIL:
-                t = self.PASS
-            else:
-                t = self.UNRESOLVED
-
-        return (t, csub)
     
     # general differential delta debugging (new TSE version)
     def dddiff(self, c):
@@ -601,7 +565,7 @@ class DD:
             p2 += 1
             p1 += 1
 
-    def _ddmax(self, c1, c2, n):  
+    def ddmax(self, c1, c2, n):  
         """Expand c1 to the maximal failing test case with respect to c2
 
         Args:
@@ -675,7 +639,8 @@ class DD:
                 csub = self.__listunion(c1, cs[i])
                 t = self.test(csub)
 
-                print("csub: ", csub)
+                if self.verbose:
+                    print("csub: ", csub)
     
                 if t == self.FAIL:
                     # If adding to the back keeps c1 failing, keep the subset
@@ -719,33 +684,33 @@ class DD:
     def dd(self, c):
         return self.dddiff(c)           # Backwards compatibility
     
-def string_to_config(s):
-    """Converts the string into a config
+    def string_to_config(s):
+        """Converts the string into a config
 
-    Args:
-        s (string): The string to be converted into a config
+        Args:
+            s (string): The string to be converted into a config
 
-    Returns:
-        config: The resultant config
-    """
-    res = []
-    idx = 0
-    for c in s:
-        res.append((idx, c))
-        idx += 1
-    return res
+        Returns:
+            config: The resultant config
+        """
+        res = []
+        idx = 0
+        for c in s:
+            res.append((idx, c))
+            idx += 1
+        return res
 
-def config_to_string(c):
-    """Converts the config c to a string (usually for testing)
+    def config_to_string(c):
+        """Converts the config c to a string (usually for testing)
 
-    Args:
-        c (config): The config to be converted to string
+        Args:
+            c (config): The config to be converted to string
 
-    Returns:
-        string: The resultant string
-    """
-    res = []
-    for x, y in c:
-        res.append(y)
-    return "".join(res)
+        Returns:
+            string: The resultant string
+        """
+        res = []
+        for x, y in c:
+            res.append(y)
+        return "".join(res)
 

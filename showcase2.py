@@ -1,8 +1,9 @@
-from humandeltadebug import DD, string_to_config, config_to_string
+from humandeltadebug import DD
+import argparse
 
 class TestString(DD):
         def _test(self, c):
-            candidate = config_to_string(c)
+            candidate = DD.config_to_string(c)
             if "$" in candidate and "test" in candidate:
                 return self.PASS
             else:
@@ -10,25 +11,29 @@ class TestString(DD):
         
         def coerce(self, c):
             # Reassemble for output.
-            print(type(c))
-            return config_to_string(c)
+            return DD.config_to_string(c)
         
 failing_string = "this input should fail"
 passing_string = "while this should $ pass the test"
 
-failing_config = string_to_config(failing_string)
-passing_config = string_to_config(passing_string)
+failing_config = DD.string_to_config(failing_string)
+passing_config = DD.string_to_config(passing_string)
+
+parser = argparse.ArgumentParser(description="Run delta debugging with verbosity control.")
+parser.add_argument('--verbose', action='store_true', help='Enable verbose output')
+args = parser.parse_args()
 
 test_string_dd = TestString()
+test_string_dd.verbose = 1 if args.verbose else 0
 
 minimal_config = test_string_dd.dd(failing_config)
-minimal_failing = config_to_string(minimal_config[0])
+minimal_failing = DD.config_to_string(minimal_config[0])
 print("**********************************************")
 print("Minimal failing test case: " + minimal_failing)
 print("**********************************************")
 
-max_config = test_string_dd._ddmax(string_to_config(minimal_failing), passing_config, 2)
-maximal_failing = config_to_string(max_config[1])
+max_config = test_string_dd.ddmax(DD.string_to_config(minimal_failing), passing_config, 2)
+maximal_failing = DD.config_to_string(max_config[1])
 print("**********************************************")
 print("Maximal failing test case: " + maximal_failing)
 print("**********************************************")

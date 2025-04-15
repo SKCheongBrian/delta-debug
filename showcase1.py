@@ -1,10 +1,10 @@
-from humandeltadebug import DD, string_to_config, config_to_string
+from humandeltadebug import DD
 import json
+import argparse
 
 class Missing_curly_brace(DD):
         def _test(self, c):
-            candidate = config_to_string(c)
-            print("Testing candidate:", candidate)
+            candidate = DD.config_to_string(c)
             # Treat an empty candidate as passing.
             if candidate.strip() == "":
                 return self.PASS
@@ -18,25 +18,29 @@ class Missing_curly_brace(DD):
         
         def coerce(self, c):
             # Reassemble for output.
-            print(type(c))
-            return config_to_string(c)
+            return DD.config_to_string(c)
         
 failing_json = '{"baz": 7, "zip": 1.0, "zop": [1, 2]'
 passing_json = '{ "foo": 3.0 }'
 
-failing_config = string_to_config(failing_json)
-passing_config = string_to_config(passing_json)
+failing_config = DD.string_to_config(failing_json)
+passing_config = DD.string_to_config(passing_json)
+
+parser = argparse.ArgumentParser(description="Run delta debugging with verbosity control.")
+parser.add_argument('--verbose', action='store_true', help='Enable verbose output')
+args = parser.parse_args()
 
 missing_curly_brace_dd = Missing_curly_brace()
+missing_curly_brace_dd.verbose = 1 if args.verbose else 0
 
 minimal_config = missing_curly_brace_dd.dd(failing_config)
-minimal_failing = config_to_string(minimal_config[0])
+minimal_failing = DD.config_to_string(minimal_config[0])
 print("**********************************************")
 print("Minimal failing test case: " + minimal_failing)
 print("**********************************************")
 
-max_config = missing_curly_brace_dd._ddmax(string_to_config(minimal_failing), passing_config, 2)
-maximal_failing = config_to_string(max_config[1])
+max_config = missing_curly_brace_dd.ddmax(DD.string_to_config(minimal_failing), passing_config, 2)
+maximal_failing = DD.config_to_string(max_config[1])
 print("**********************************************")
 print("Maximal failing test case: " + maximal_failing)
 print("**********************************************")
@@ -44,17 +48,17 @@ print("**********************************************")
 failing_json2 = '{"foo": 3.0, "bar": 1.0 '
 passing_json2 = '{ "boo": "bar" }'
 
-failing_config2 = string_to_config(failing_json2)
-passing_config2 = string_to_config(passing_json2)
+failing_config2 = DD.string_to_config(failing_json2)
+passing_config2 = DD.string_to_config(passing_json2)
 
 minimal_config = missing_curly_brace_dd.dd(failing_config2)
-minimal_failing = config_to_string(minimal_config[0])
+minimal_failing = DD.config_to_string(minimal_config[0])
 print("**********************************************")
 print("Minimal failing test case: " + minimal_failing)
 print("**********************************************")
 
-max_config = missing_curly_brace_dd._ddmax(string_to_config(minimal_failing), passing_config2, 2)
-maximal_failing = config_to_string(max_config[1])
+max_config = missing_curly_brace_dd.ddmax(DD.string_to_config(minimal_failing), passing_config2, 2)
+maximal_failing = DD.config_to_string(max_config[1])
 print("**********************************************")
 print("Maximal failing test case: " + maximal_failing)
 print("**********************************************")
