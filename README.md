@@ -67,21 +67,38 @@ while remaining within the boundaries of the passing test case.
 
 ---
 ## Running showcases
-The files in this repository marked as `showcaseX.py` (X being a number) can be run using the following instructions. Each file contains one or two tests examples to show how our dd algorithm (in `humandeltadebug.py`) works.
+The files in this repository marked as `showcase*.py` (* being a number) can be run using the following instructions. Each file contains few test examples to show how our dd algorithm (in `humandeltadebug.py`) works. The descriptions of each showcase are in their respective files. 
 
 ### Batch running showcases
-To run the test cases, simply run `runshowcases.sh`. This will run all the showcases.
+You can run all the showcases at once using the provided scripts:
+
+**On Unix/macOS (with `sh`)**:
+
 ```shell
 ./runshowcases.sh
 ```
-This would create `showcase1.out`, `showcase2.out`, and `showcase3.out`, which contain the output of running the showcases
+**On Windows:**
+
+```shell
+.\runshowcases.bat
+```
+
+This will execute all `showcase*.py` files in the directory and store their outputs in a folder called `showcase_output` as `showcase*.out` files. 
 
 If you wish to see a more verbose output, albeit hard to interpret, add the `--verbose` flag
+
+**On Unix/macOS (with `sh`)**:
 
 ```shell
 ./runshowcases.sh --verbose
 ```
-This would create `verbose-showcase1.out`, `verbose-showcase2.out`, and `verbose-showcase3.out`, which contain the verbose output of running the showcases.
+
+**On Windows:**
+
+```shell
+.\runshowcases.bat --verbose
+```
+This would create `verbose-showcase*.out` in `showcase_output` which contain the verbose output of running the showcases.
 
 ### Running individual showcases
 
