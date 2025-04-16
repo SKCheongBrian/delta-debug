@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 
 VERBOSE=false
+OUTPUT_DIR="showcase_output"
+
+mkdir -p "$OUTPUT_DIR"
+rm -f "$OUTPUT_DIR"/*.out 2>/dev/null
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -10,12 +14,11 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
-if [ "$VERBOSE" = true ]; then
-    python3 ./showcase1.py --verbose > verbose-showcase1.out 
-    python3 ./showcase2.py --verbose > verbose-showcase2.out 
-    python3 ./showcase3.py --verbose > verbose-showcase3.out 
-else
-    python3 ./showcase1.py > showcase1.out 
-    python3 ./showcase2.py > showcase2.out 
-    python3 ./showcase3.py > showcase3.out 
-fi
+for file in ./showcase*.py; do
+    base_name=$(basename "$file" .py)
+    if [ "$VERBOSE" = true ]; then
+        python3 "$file" --verbose > "$OUTPUT_DIR/verbose-$base_name.out" 
+    else
+        python3 "$file" > "$OUTPUT_DIR/$base_name.out" 
+    fi
+done

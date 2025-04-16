@@ -8,6 +8,7 @@ __pycache__/
 
 # test outputs
 *.out
+showcase_output/
 
 # Distribution / packaging
 .Python

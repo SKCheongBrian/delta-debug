@@ -67,7 +67,7 @@ while remaining within the boundaries of the passing test case.
 
 ---
 ## Running showcases
-The files in this repository marked as `showcaseX.py` can be run using the following instructions. Each file contains one or two tests examples to show how our dd algorithm (in `humandeltadebug.py`) works.
+The files in this repository marked as `showcaseX.py` (X being a number) can be run using the following instructions. Each file contains one or two tests examples to show how our dd algorithm (in `humandeltadebug.py`) works.
 
 ### Batch running showcases
 To run the test cases, simply run `runshowcases.sh`. This will run all the showcases.
