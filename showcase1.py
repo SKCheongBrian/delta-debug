@@ -3,6 +3,10 @@ from humandeltadebug import DD
 import json
 import argparse
 
+'''
+This example contains 2 tests that demonstrate the use of dd to find the issue in a malformed JSON (missing curly brace).
+'''
+
 class Missing_curly_brace(DD):
         def _test(self, c):
             candidate = DD.config_to_string(c)

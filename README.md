@@ -1,6 +1,6 @@
-# Delta-Debug
+# Delta Debugging for Humans
 
-- [Delta-Debug](#delta-debug)
+- [Delta Debugging for Humans](#delta-debugging-for-humans)
   - [What is this?](#what-is-this)
   - [How is this achieved](#how-is-this-achieved)
   - [Algorithm of ddmax](#algorithm-of-ddmax)
@@ -8,6 +8,7 @@
     - [Batch running showcases](#batch-running-showcases)
     - [Running individual showcases](#running-individual-showcases)
   - [Future works](#future-works)
+- [References](#references)
 
 
 ## What is this?
@@ -19,7 +20,7 @@ it is better for developers to receive a failing test case that has a minimal
 difference from passing test cases.
 
 ## How is this achieved
-In our modified implementation of Zeller's original delta debugging work, 
+In our modified implementation of Zeller's original delta debugging work [1], [2], [3], 
 we achieve this in a 2-step process:
 
 1. **Delta Debugging (dd)**:
@@ -62,7 +63,7 @@ allows them to better discover the root cause of the test failure.
    and the original passing test case (`c2`).
 
 This algorithm ensures that the failing test case is expanded as much as possible
-while remaining within the boundaries of the passing test case.## Algorithm of ddmax
+while remaining within the boundaries of the passing test case.
 
 ---
 ## Running showcases
@@ -83,7 +84,7 @@ This would create `verbose-showcase1.out`, `verbose-showcase2.out`, and `verbose
 
 ### Running individual showcases
 
-To run individual showcases, you may run the commands
+To run individual showcases, you may run the commands (`python` or `python3` based on the way the command is configured on your system)
 ```shell
 python3 showcase1.py
 ```
@@ -105,3 +106,11 @@ python3 showcase1.py --verbose
 ## Future works
 - Explore using other minimisation/maximisation metrics, for example edit distance or hamming distance.
 - Explore minimising the passing test case, as opposed to our current approach of maximising the failing test case.
+
+# References
+[1] A. Zeller and R. Hildebrandt, "Simplifying and isolating failure-inducing input," in IEEE Transactions on Software Engineering, vol. 28, no. 2, pp. 183-200, Feb. 2002, doi: 10.1109/32.988498
+[2] A. Zeller, Original DD.py implementation, https://www.st.cs.uni-saarland.de/dd/DD.py
+[3] grimm-co, “GitHub - grimm-co/delta-debugging: Debugging library to quickly get the minimal crashing test case,” GitHub, 2016. https://github.com/grimm-co/delta-debugging
+‌
+‌
+

@@ -2,6 +2,11 @@
 from humandeltadebug import DD
 import argparse
 
+'''
+This example contains a test that demonstrates the use of dd to find the issue with a string configuration. A valid string configuration is one that contains a dollar sign ($) and the word "test".
+The test case will fail if the string does not contain both of these elements.
+'''
+
 class TestString(DD):
         def _test(self, c):
             candidate = DD.config_to_string(c)

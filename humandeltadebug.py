@@ -1,4 +1,4 @@
-# Modified from Prof. Andreas Zeller's original implementation in DD.py
+# Parts are modified from Prof. Andreas Zeller's original implementation in DD.py
 # Stripped down unused portions and extended with ddmax
 #
 # ddmax is attempting to create a maximal failing test case with respect to a passing one

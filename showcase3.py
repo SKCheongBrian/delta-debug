@@ -2,6 +2,11 @@
 from humandeltadebug import DD
 import argparse
 
+'''
+This example contains a test that demonstrates the use of dd to find a logic bug in Python code. 
+The test case will fail if the function does not return the sum of two numbers. 
+'''
+
 class WrongLogic(DD):
     def _test(self, c):
         candidate = DD.config_to_string(c)
