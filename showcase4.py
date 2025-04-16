@@ -40,7 +40,7 @@ dd = MissingFile()
 
 # For testing verbose flag
 parser = argparse.ArgumentParser()
-parser.add_argument('--verbose', action='store_true')
+parser.add_argument('--verbose', action='store_true', help='Enable verbose output')
 args = parser.parse_args()
 
 # Set verbosity for delta debugging
@@ -49,13 +49,18 @@ dd.verbose = 1 if args.verbose else 0
 # Get minimal failing configuration
 minimal_config = dd.dd(failing_config)
 minimal_failing = DD.config_to_string(minimal_config[0])
+print("**********")
+print("* Test 1 *")
 print("**********************************************")
-print("Minimal failing test case: " + minimal_failing)
+print("Failing test case to be minimised: \n " + failing_code)
 print("**********************************************")
+print("Minimal failing test case: \n" + minimal_failing)
+print("**********************************************")
+print("Passing test case to be maximised with respect to: \n" + passing_code)
 
 # Get maximal failing configuration
 max_config = dd.ddmax(DD.string_to_config(minimal_failing), passing_config, 2)
 maximal_failing = DD.config_to_string(max_config[1])
 print("**********************************************")
-print("Maximal failing test case: " + maximal_failing)
+print("Maximal failing test case: \n" + maximal_failing)
 print("**********************************************")
