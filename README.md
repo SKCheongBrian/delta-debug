@@ -109,7 +109,9 @@ python3 showcase1.py --verbose
 
 # References
 [1] A. Zeller and R. Hildebrandt, "Simplifying and isolating failure-inducing input," in IEEE Transactions on Software Engineering, vol. 28, no. 2, pp. 183-200, Feb. 2002, doi: 10.1109/32.988498
+
 [2] A. Zeller, Original DD.py implementation, https://www.st.cs.uni-saarland.de/dd/DD.py
+
 [3] grimm-co, “GitHub - grimm-co/delta-debugging: Debugging library to quickly get the minimal crashing test case,” GitHub, 2016. https://github.com/grimm-co/delta-debugging
 ‌
 ‌
