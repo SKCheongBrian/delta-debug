@@ -1,3 +1,4 @@
+# @authors: skcheongbrian, sevenseasofbri
 from humandeltadebug import DD
 import argparse
 

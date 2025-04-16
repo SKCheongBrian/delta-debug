@@ -3,11 +3,15 @@
 #
 # ddmax is attempting to create a maximal failing test case with respect to a passing one
 #
+# The original implementations are available at:
+# https://www.st.cs.uni-saarland.de/dd/DD.py
 # https://github.com/grimm-co/delta-debugging/blob/master/delta_debugging/DD.py
+ 
 
 import string
 
 # This class hold test outcomes for configs. Avoid running same test twice.
+# Ref: https://www.st.cs.uni-saarland.de/dd/DD.py
 class OutcomeCache:
     # Implemented as a tree. Each node points to the outcome of the
     # remaining list.
@@ -176,6 +180,7 @@ class DD:
         self.n_unres  = 0
     
     # helpers
+    # Ref: https://www.st.cs.uni-saarland.de/dd/DD.py
     def __listminus(self, c1, c2):
         """Return a list of all elements of C1 that are not in C2."""
         s2 = {}
@@ -386,6 +391,7 @@ class DD:
 
     
     # general differential delta debugging (new TSE version)
+    # Ref: https://www.st.cs.uni-saarland.de/dd/DD.py
     def dddiff(self, c):
         n = 2
 
@@ -549,8 +555,9 @@ class DD:
             n   = next_n
             run = run + 1
 
+    # @authors: skcheongbrian, sevenseasofbri
     def match_subset(self, c1, c2):
-        """Mutate c1 a subset of c2 if possible
+        """Mutate c1 to a subset of c2 if possible
 
         Args:
             c1 (config): config of c1
@@ -568,7 +575,8 @@ class DD:
             c1[p1] = (c2[p2][0], current_character)
             p2 += 1
             p1 += 1
-
+    
+    # @authors: skcheongbrian, sevenseasofbri
     def ddmax(self, c1, c2, n):  
         """Expand c1 to the maximal failing test case with respect to c2
 
@@ -688,6 +696,7 @@ class DD:
     def dd(self, c):
         return self.dddiff(c)           # Backwards compatibility
     
+    # @authors: skcheongbrian, sevenseasofbri
     def string_to_config(s):
         """Converts the string into a config
 
@@ -704,6 +713,7 @@ class DD:
             idx += 1
         return res
 
+    # @authors: skcheongbrian, sevenseasofbri
     def config_to_string(c):
         """Converts the config c to a string (usually for testing)
 
