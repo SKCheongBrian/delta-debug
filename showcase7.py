@@ -44,7 +44,6 @@ passing_input = '''
     "cgra": {
         "num_pes":  64,
         "clock_period": 12
-        "hops": 2
     }
 }
 '''
