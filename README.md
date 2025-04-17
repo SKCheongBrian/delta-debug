@@ -112,7 +112,7 @@ python3 showcase2.py
 ```shell
 python3 showcase3.py
 ```
-This would run the first showcase, second showcase, and third showcase respectfully.
+This, for example would run the first showcase, second showcase, and third showcase respectfully.
 
 In order to view the verbose output, simply add the `--verbose` flag to the end of the command
 

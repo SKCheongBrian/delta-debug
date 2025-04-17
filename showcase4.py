@@ -3,7 +3,7 @@ import argparse
 import os
 
 '''
-This example contains a test to show the use of dd to find a reference to a non-existant file.
+This example contains a test to show the use of dd to find a reference to a non-existent file.
 The test case will fail if the file does not exist.
 '''
 
